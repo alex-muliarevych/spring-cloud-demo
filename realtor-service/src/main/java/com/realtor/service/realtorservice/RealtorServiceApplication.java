@@ -5,16 +5,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.data.annotation.Id;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import java.util.List;
 import java.util.regex.Pattern;
 
+@EnableDiscoveryClient
 @SpringBootApplication
 public class RealtorServiceApplication {
 
@@ -41,12 +42,20 @@ public class RealtorServiceApplication {
 		@Value("${rate:100}")
 		private String rate;
 
+		@Autowired
+		private DiscoveryClient discoveryClient;
+
+		@RequestMapping("/service-instances/{applicationName}")
+		public List<ServiceInstance> serviceInstancesByApplicationName(@PathVariable String applicationName) {
+			return this.discoveryClient.getInstances(applicationName);
+		}
+
 		@RequestMapping(value = "/maxRate")
 		String getMaxRate() {
 			return rate;
 		}
 
-		@RequestMapping(value = "/create", method = RequestMethod.POST)
+		@RequestMapping(value = "/createOffer", method = RequestMethod.POST)
 		@ResponseBody
 		public HomeOffer updateCustomer(@RequestBody HomeOffer homeOffer) {
 			if(homeOffer.getPrice() / homeOffer.getSqft() < Double.valueOf(rate))
