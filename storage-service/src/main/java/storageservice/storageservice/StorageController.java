@@ -5,9 +5,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -59,7 +62,13 @@ public class StorageController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public OwnerInfo addRealtor(@RequestBody OwnerInfo ownerInfo) {
+    public OwnerInfo addRealtor(@RequestBody OwnerInfo ownerInfo, HttpServletResponse response) {
+        boolean entityExist = ownerInfoRepository.findAll().stream().filter(e -> e.equals(ownerInfo)).count() > 0;
+        if (entityExist) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setHeader("Error", "Owner already exists");
+            return ownerInfo;
+        }
         ownerInfoRepository.save(ownerInfo);
         return ownerInfo;
     }

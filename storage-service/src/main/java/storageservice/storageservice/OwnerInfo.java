@@ -1,6 +1,6 @@
 package storageservice.storageservice;
 
-import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -9,6 +9,7 @@ import javax.persistence.Id;
  * Created by omuliarevych on 5/30/17.
  */
 @Entity
+@EqualsAndHashCode
 public class OwnerInfo {
     @Id
     protected String email;
